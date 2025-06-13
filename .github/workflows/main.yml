@@ -45,14 +45,22 @@ jobs:
           echo "workspace-folder=$(pwd)" >> $GITHUB_OUTPUT
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
-            if [ "${{ github.event.inputs.choice }}" == "ROM_MANIFEST" ]; then
-                  repo init --depth=1 -u ${{ github.event.inputs.ROM_MANIFEST_URL }} -b ${{ github.event.inputs.ROM_MANIFEST_BRANCH }} --git-lfs
-            else
+          
                   rm -rf .repo/local_manifests &&
-                  repo init --depth=1 -u ${{ github.event.inputs.ROM_MANIFEST_URL }} -b ${{ github.event.inputs.ROM_MANIFEST_BRANCH }} --git-lfs &&
-                  git clone ${{ github.event.inputs.LOCAL_MANIFEST_URL }} -b ${{ github.event.inputs.LOCAL_MANIFEST_BRANCH }}  .repo/local_manifests 
-            fi
-          timeout 2m repo sync || { exit_code=$?; [ $exit_code -eq 124 ] || (echo "Error: Process failed with exit code $exit_code"; exit $exit_code); }
+                  repo init --depth=1 -u https://github.com/LineageOS/android -b lineage-22.2 --git-lfs &&
+            git clone https://github.com/LineageOS/android_device_samsung_a71 -b lineage-22.2 device/samsung/a71
+            git clone https://github.com/LineageOS/android_device_samsung_a71-common -b lineage-22.2 device/samsung/a71-common
+              git clone https://github.com/LineageOS/android_kernel_samsung_a71 -b lineage-22.2 kernel/samsung/a71
+              git clone https://github.com/TheMuppets/proprietary_vendor_samsung_a71 -b lineage-22.2 vendor/samsung/a71
+                  git clone https://github.com/TheMuppets/proprietary_vendor_samsung_a71-common -b lineage-22.2 vendor/samsung/a71-common 
+            git clone https://github.com/LineageOS/android_hardware_qcom-caf_common -b lineage-22.2 hardware/qcom-caf/common
+            git clone https://github.com/LineageOS/android_device_qcom_sepolicy-b lineage-22.2 device/qcom/sepolicy_vndr
+              git clone https://github.com/LineageOS/android_hardware_samsung -b lineage-22.2 hardware/samsung
+
+              repo sync --force-sync
+           source build/envsetup.sh
+                lunch lineage_a71-bp1a-userdebug
+              mka bacon
         timeout-minutes: 10
     strategy:
         fail-fast: true
